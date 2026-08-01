@@ -1,4 +1,4 @@
-# AlgoVerse Architecture Guide
+# AlgoVerse Architecture Guide 🌌
 
 ## 💡 Architectural Philosophy
 
@@ -14,7 +14,7 @@ Traditional visualization platforms directly manipulate DOM element styles, time
 AlgoVerse solves this by enforcing a **Pure Step Generator Pattern**:
 
 ```
-[Graph Canvas Input] ──► [generateDijkstraSteps()] ──► [SimulationStep[] Array] ──► [React UI Rendering]
+[User Data / Graph Input] ──► [generateAlgorithmSteps()] ──► [SimulationStep[] Array] ──► [React UI Rendering]
 ```
 
 ### `SimulationStep` Structure
@@ -25,7 +25,7 @@ export interface SimulationStep {
   stepNumber: number;
   action: string;
 
-  highlights: {
+  highlights?: {
     nodes?: string[];
     edges?: string[];
     indices?: number[];
@@ -33,32 +33,55 @@ export interface SimulationStep {
     pointers?: Record<string, number>;
   };
 
-  state: Record<string, unknown>;
+  state?: Record<string, unknown>;
 
-  explanation: {
+  explanation?: {
     title: string;
     description: string;
     reason: string;
   };
 
   highlightedPseudocodeLine: number;
-
   animationType: "fade" | "pulse" | "glow" | "bounce";
 }
 ```
 
+### Domain-Agnostic State Payloads
 Each algorithm populates `state` and `highlights` with only the domain data it needs:
-- **Dijkstra / Graph**: `distances`, `priorityQueue`, `previousNodes`
-- **Sorting**: `array`, `comparisonCount`, `swapCount`
-- **Tree**: `traversalOrder`, `activeValue`
-- **DP**: `grid`, `activeCell`, `dependencyCells`
-- **Hashing**: `table`, `hashSize`, `calculatedIndex`
 
-### Adding Future Algorithms
-To add new algorithms (e.g., BFS, DFS, Prim's, Kruskal's, Bellman-Ford, Sorting, OS Scheduling):
-1. Write a pure generator function `generateBFSSteps(...)` returning `SimulationStep[]`.
-2. Pass the resulting array into `useSimulationStore`.
-3. **Zero changes** are required to the React flow rendering engine or playback control components!
+- **Graph Algorithms (Dijkstra, BFS, DFS, Prim's, Kruskal's, Bellman-Ford)**: `distances`, `priorityQueue`, `previousNodes`, `visitedNodes`
+- **Searching & Sorting (Linear, Binary, Bubble, Selection, Insertion, Merge, Quick)**: `array`, `comparingIndices`, `swappingIndices`, `sortedIndices`, `comparisonCount`, `swapCount`
+- **Trees & Hierarchies**: `treeNodes`, `activeNodeValue`, `traversalOrder`
+- **Dynamic Programming (0/1 Knapsack, LCS)**: `matrix`, `activeRow`, `activeCol`, `dependencyCells`
+- **Greedy (Activity Selection, Fractional Knapsack)**: `activities`, `selectedCount`, `currentRatio`
+- **Backtracking (N-Queens)**: `board`, `queenPositions`, `backtrackPath`
+- **Sliding Window & Two Pointers**: `windowStart`, `windowEnd`, `leftPointer`, `rightPointer`
+- **Union Find / DSU**: `parents`, `ranks`, `activeQuery`
+- **Trie & Heap**: `rootNode`, `prefixMatches`, `heapArray`
+- **Topological Sort**: `inDegrees`, `zeroDegreeQueue`, `topologicalOrder`
+- **String Matching (KMP)**: `text`, `pattern`, `lpsTable`, `textPointer`, `patternPointer`
+- **Hashing**: `buckets`, `hashSize`, `calculatedIndex`, `collisionChains`
+
+---
+
+## 🎨 Modular Visualizer Architecture
+
+AlgoVerse uses specialized visualizer components that consume standard `SimulationStep[]` outputs:
+
+- `GraphEditor.tsx`: React Flow canvas for interactive graph manipulation.
+- `BarVisualizer.tsx`: Dynamic height bars with color-coded comparison and swap states.
+- `ArrayVisualizer.tsx`: Element card arrays with low/mid/high search pointers.
+- `TreeVisualizer.tsx`: Hierarchical SVG node layouts with traversal highlights.
+- `DPTableVisualizer.tsx`: 2D animated matrix grids.
+- `IntervalVisualizer.tsx`: Timeline bars for activity selection intervals.
+- `BoardVisualizer.tsx`: N×N chessboard grids for N-Queens backtracking.
+- `WindowVisualizer.tsx`: Dual-pointer sliding window overlays.
+- `PointersVisualizer.tsx`: Converging left/right pointers.
+- `DSUVisualizer.tsx`: Disjoint set partition tree nodes.
+- `TrieVisualizer.tsx`: Multi-way prefix tree nodes.
+- `HeapVisualizer.tsx`: Complete binary tree heap nodes and array mappings.
+- `KMPVisualizer.tsx`: Dual text/pattern character rows with LPS prefix tables.
+- `HashVisualizer.tsx`: Bucket slots with linked list chaining.
 
 ---
 
@@ -68,17 +91,20 @@ To add new algorithms (e.g., BFS, DFS, Prim's, Kruskal's, Bellman-Ford, Sorting,
 algoverse/
 ├── frontend/
 │   ├── app/                    # Next.js 15 App Router pages & layouts
+│   │   ├── dashboard/          # Real-time dashboard page
+│   │   ├── simulation/         # 31 algorithm visualizer pages
+│   │   ├── sign-in/            # Clerk sign-in route
+│   │   └── sign-up/            # Clerk sign-up route
 │   ├── components/
 │   │   ├── layout/             # Header & Navigation components
 │   │   ├── graph/              # React Flow Canvas, Custom Nodes & Edge Weight Editor
-│   │   ├── simulation/         # Simulation Controls, Theory Panel, Pseudocode & Distance Table
-│   │   ├── dashboard/          # Welcome Card, Stat Cards, Progress Bar & Activity Feed
-│   │   └── quiz/               # Interactive MCQ & Step Prediction Card
-│   ├── hooks/                  # React custom hooks
-│   ├── services/               # Reusable Axios API services
+│   │   ├── simulation/         # Simulation Controls, Theory Panel, Pseudocode & Inspectors
+│   │   └── dashboard/          # Welcome Card, Stat Cards, Progress Chart & Activity Feed
+│   ├── constants/              # Catalog registry & TheoryRegistry definitions
+│   ├── services/               # Reusable API & activityTracker services
 │   ├── store/                  # Zustand stores (useGraphStore, useSimulationStore, useUserStore)
 │   ├── types/                  # TypeScript domain type declarations
-│   └── utils/                  # Pure algorithm engines (dijkstraEngine.ts)
+│   └── utils/                  # Pure algorithm step generators across 15 categories
 └── backend/
     ├── config/                 # Django settings, URLs, WSGI/ASGI apps
     └── apps/
@@ -86,7 +112,6 @@ algoverse/
         ├── progress/           # Progress tracking & achievement models
         ├── algorithms/         # Algorithm definitions & complexities
         ├── graphs/             # Saved custom graph layouts
-        ├── quiz/               # Quiz questions & results submission
         ├── bookmarks/          # Saved topic bookmarks
         └── common/             # Shared utilities
 ```
