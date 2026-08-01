@@ -1,4 +1,4 @@
-# AlgoVerse Installation & Setup Guide
+# AlgoVerse Installation & Setup Guide 🛠️
 
 This guide walks you through setting up both the **Frontend (Next.js 15)** and **Backend (Django REST Framework)** locally.
 
@@ -7,7 +7,7 @@ This guide walks you through setting up both the **Frontend (Next.js 15)** and *
 ## 📋 Prerequisites
 
 - **Node.js**: v18.0.0 or higher
-- **Python**: v3.11 or higher
+- **Python**: v3.10 or higher
 - **PostgreSQL**: v14.0 or higher (or SQLite for quick local development)
 - **Clerk Account**: Free account at [clerk.com](https://clerk.com)
 
@@ -26,14 +26,10 @@ This guide walks you through setting up both the **Frontend (Next.js 15)** and *
    ```
 
 3. **Configure Environment Variables**:
-   Copy `.env.example` to `.env.local`:
-   ```bash
-   cp .env.example .env.local
-   ```
-   Fill in your Clerk publishable & secret keys:
+   Create a `.env.local` file in `frontend/`:
    ```env
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-   CLERK_SECRET_KEY=sk_test_...
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y2VydGFpbi1saW9uLTE5LmNsZXJrLmFjY291bnRzLmRldiQ
+   CLERK_SECRET_KEY=sk_test_zPVmUDtBkfpxKU0yGW91svAOaERC2gha6bkvLFrdIm
    NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
    ```
 
@@ -41,7 +37,7 @@ This guide walks you through setting up both the **Frontend (Next.js 15)** and *
    ```bash
    npm run dev
    ```
-   The frontend will be available at `http://localhost:3000`.
+   The frontend will run on `http://localhost:3000`.
 
 ---
 
@@ -54,7 +50,7 @@ This guide walks you through setting up both the **Frontend (Next.js 15)** and *
 
 2. **Create and Activate a Python Virtual Environment**:
    - **Windows**:
-     ```bash
+     ```powershell
      python -m venv venv
      .\venv\Scripts\activate
      ```
@@ -70,20 +66,15 @@ This guide walks you through setting up both the **Frontend (Next.js 15)** and *
    ```
 
 4. **Configure Environment Variables**:
-   Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-   Configure database parameters & Clerk secret key:
+   Create a `.env` file in `backend/`:
    ```env
    SECRET_KEY=django-insecure-algoverse-key
    DEBUG=True
    ALLOWED_HOSTS=localhost,127.0.0.1
    CORS_ALLOWED_ORIGINS=http://localhost:3000
 
-   CLERK_SECRET_KEY=sk_test_...
+   CLERK_SECRET_KEY=sk_test_zPVmUDtBkfpxKU0yGW91svAOaERC2gha6bkvLFrdIm
 
-   DATABASE_URL=postgres://postgres:user106b@localhost:5432/algoverse_db
    DATABASE_NAME=algoverse_db
    DATABASE_USER=postgres
    DATABASE_PASSWORD=user106b
@@ -105,9 +96,17 @@ This guide walks you through setting up both the **Frontend (Next.js 15)** and *
 
 ---
 
-## ✅ Verification Checklist
+## ✅ Verification & Testing Checklist
 
-- Open `http://localhost:3000` in browser.
+- Open `http://localhost:3000` in your browser.
 - Log in using Clerk Auth.
-- Navigate to `/dashboard` and click **Try Dijkstra Visualizer**.
-- Verify step-by-step playback and graph editor interactivity.
+- Navigate to `/dashboard` to view the 15-category curriculum progress matrix.
+- Launch any simulation (e.g. `/simulation/bubble-sort`, `/simulation/dijkstra`, `/simulation/kmp`, `/simulation/hash-table`).
+- Test playback controls (Play, Step Forward/Back, Speed Slider) and interactive graph editor canvas.
+
+---
+
+## 📜 Support & Resources
+
+- [Architecture Guide](ARCHITECTURE.md)
+- [Main Repository README](README.md)
