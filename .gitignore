@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+venv/
+env/
+ENV/
+.venv/
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+
+# Python cache & database
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+db.sqlite3
+
+# Environment variables & secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

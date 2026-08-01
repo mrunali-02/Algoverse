@@ -1,0 +1,1 @@
+# Django apps container module
