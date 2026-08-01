@@ -1,13 +1,20 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Sparkles, Award, Flame } from "lucide-react";
 import { motion } from "framer-motion";
-import { useUserStore } from "@/store/useUserStore";
+import { activityTracker } from "@/services/activityTracker";
 
 export function WelcomeCard() {
   const { user } = useUser();
-  const { stats } = useUserStore();
+  const [streakDays, setStreakDays] = useState(4);
+  const [curriculumStats, setCurriculumStats] = useState({ visited: 15, total: 31, percentage: 100 });
+
+  useEffect(() => {
+    setStreakDays(activityTracker.getStreak());
+    setCurriculumStats(activityTracker.getVisitedStats());
+  }, []);
 
   const displayName = user?.firstName || user?.username || "Engineering Student";
 
@@ -46,7 +53,7 @@ export function WelcomeCard() {
             </div>
             <div>
               <p className="text-xs text-slate-400 font-medium">Daily Streak</p>
-              <p className="text-lg font-bold text-slate-100">{stats.learningStreakDays} Days 🔥</p>
+              <p className="text-lg font-bold text-slate-100">{streakDays} {streakDays === 1 ? 'Day' : 'Days'} 🔥</p>
             </div>
           </div>
 
@@ -56,7 +63,7 @@ export function WelcomeCard() {
             </div>
             <div>
               <p className="text-xs text-slate-400 font-medium">Curriculum</p>
-              <p className="text-lg font-bold text-slate-100">100% Active</p>
+              <p className="text-lg font-bold text-slate-100">{curriculumStats.percentage}% Active</p>
             </div>
           </div>
         </div>

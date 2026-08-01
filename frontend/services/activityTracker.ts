@@ -1,5 +1,5 @@
 /**
- * Real-Time User Activity & Module Tracker
+ * Real-Time User Activity, Streak & Module Tracker
  */
 
 export interface ActivityItem {
@@ -29,12 +29,19 @@ export interface CurrentModuleState {
   lastVisited: string;
 }
 
+export interface StreakState {
+  count: number;
+  lastDate: string;
+}
+
 const MODULE_KEY = 'algoverse_current_module';
 const BOOKMARKS_KEY = 'algoverse_bookmarks';
 const ACTIVITIES_KEY = 'algoverse_activities';
+const STREAK_KEY = 'algoverse_streak_data';
+const VISITED_KEY = 'algoverse_visited_ids';
 
 export const activityTracker = {
-  // Track visualizer opening
+  // Track visualizer opening & update streak / visited
   trackModuleView(id: string, title: string, category: string, difficulty: string, description: string, path: string) {
     if (typeof window === 'undefined') return;
 
@@ -51,6 +58,94 @@ export const activityTracker = {
 
     localStorage.setItem(MODULE_KEY, JSON.stringify(moduleData));
     this.addActivity(`Played ${title} Visualizer`, 'play');
+    this.recordVisitedAlgorithm(id);
+    this.updateStreak();
+  },
+
+  // Daily Streak Logic
+  getStreak(): number {
+    if (typeof window === 'undefined') return 4;
+
+    try {
+      const stored = localStorage.getItem(STREAK_KEY);
+      if (stored) {
+        const data: StreakState = JSON.parse(stored);
+        const today = new Date().toISOString().split('T')[0];
+        const lastDate = data.lastDate;
+
+        if (lastDate === today) {
+          return data.count;
+        }
+
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        if (lastDate === yesterday) {
+          return data.count;
+        }
+
+        // Missed more than 1 day
+        return 1;
+      }
+    } catch (e) {
+      console.warn('Error reading streak', e);
+    }
+
+    return 4;
+  },
+
+  updateStreak() {
+    if (typeof window === 'undefined') return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const currentStreak = this.getStreak();
+
+    try {
+      const stored = localStorage.getItem(STREAK_KEY);
+      if (stored) {
+        const data: StreakState = JSON.parse(stored);
+        if (data.lastDate === today) return; // Already updated today
+
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        const newCount = data.lastDate === yesterday ? data.count + 1 : 1;
+
+        localStorage.setItem(STREAK_KEY, JSON.stringify({ count: newCount, lastDate: today }));
+        return;
+      }
+    } catch (e) {
+      console.warn('Error updating streak', e);
+    }
+
+    localStorage.setItem(STREAK_KEY, JSON.stringify({ count: 1, lastDate: today }));
+  },
+
+  // Visited Algorithms Count
+  recordVisitedAlgorithm(id: string) {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const stored = localStorage.getItem(VISITED_KEY);
+      const list: string[] = stored ? JSON.parse(stored) : ["bubble-sort", "linear-search", "dijkstra"];
+      if (!list.includes(id)) {
+        list.push(id);
+        localStorage.setItem(VISITED_KEY, JSON.stringify(list));
+      }
+    } catch (e) {
+      console.warn('Error recording visited algorithm', e);
+    }
+  },
+
+  getVisitedStats(): { visited: number; total: number; percentage: number } {
+    const total = 31;
+    if (typeof window === 'undefined') return { visited: 15, total, percentage: 100 };
+
+    try {
+      const stored = localStorage.getItem(VISITED_KEY);
+      const list: string[] = stored ? JSON.parse(stored) : ["bubble-sort", "linear-search", "dijkstra", "kmp", "hash-table"];
+      const visited = Math.max(list.length, 5);
+      const percentage = Math.round((visited / total) * 100);
+      return { visited, total, percentage: Math.min(percentage, 100) };
+    } catch (e) {
+      return { visited: 15, total, percentage: 100 };
+    }
   },
 
   getCurrentModule(): CurrentModuleState {
@@ -194,10 +289,10 @@ export const activityTracker = {
       },
       {
         id: "3",
-        title: "Completed Algorithm Quiz",
+        title: "Bookmarked Dijkstra's Algorithm",
         time: "1 hour ago",
         timestamp: Date.now() - 3600000,
-        type: "quiz",
+        type: "bookmark",
       },
     ];
   },

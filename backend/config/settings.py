@@ -71,15 +71,37 @@ WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
 # PostgreSQL Database Configuration with SQLite Fallback
+DATABASE_URL = os.getenv('DATABASE_URL')
 DB_NAME = os.getenv('DATABASE_NAME', 'algoverse_db')
 DB_USER = os.getenv('DATABASE_USER', 'postgres')
 DB_PASSWORD = os.getenv('DATABASE_PASSWORD', 'user106b')
 DB_HOST = os.getenv('DATABASE_HOST', 'localhost')
 DB_PORT = os.getenv('DATABASE_PORT', '5432')
 
-USE_POSTGRES = os.getenv('USE_POSTGRES', 'False').lower() in ('true', '1', 't')
+USE_POSTGRES = os.getenv('USE_POSTGRES', 'False').lower() in ('true', '1', 't') or bool(DATABASE_URL)
 
-if USE_POSTGRES:
+if DATABASE_URL:
+    try:
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=DATABASE_URL,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
+        }
+    except ImportError:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': DB_NAME,
+                'USER': DB_USER,
+                'PASSWORD': DB_PASSWORD,
+                'HOST': DB_HOST,
+                'PORT': DB_PORT,
+            }
+        }
+elif USE_POSTGRES:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -98,6 +120,7 @@ else:
         }
     }
 
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -113,6 +136,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

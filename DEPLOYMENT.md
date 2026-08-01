@@ -24,11 +24,11 @@ This guide details how to deploy **AlgoVerse** to production using **Vercel** fo
    - **Environment**: `Python 3`
    - **Build Command**:
      ```bash
-     pip install -r requirements.txt && python manage.py migrate
+     pip install -r requirements.txt && python manage.py collectstatic --noinput
      ```
    - **Start Command**:
      ```bash
-     gunicorn config.wsgi:application
+     python manage.py migrate && gunicorn config.wsgi:application
      ```
 
 4. Set Environment Variables in Render Dashboard:
@@ -36,7 +36,7 @@ This guide details how to deploy **AlgoVerse** to production using **Vercel** fo
    SECRET_KEY=generate-a-strong-random-production-secret-key
    DEBUG=False
    ALLOWED_HOSTS=.onrender.com,yourdomain.com
-   CORS_ALLOWED_ORIGINS=https://algoverse.vercel.app
+   CORS_ALLOWED_ORIGINS=https://algoverse-green.vercel.app
 
    CLERK_SECRET_KEY=sk_test_...
 
@@ -63,6 +63,7 @@ This guide details how to deploy **AlgoVerse** to production using **Vercel** fo
 
 ## 🔍 Verification
 
-1. Navigate to your Vercel production URL: `https://algoverse.vercel.app`.
+1. Navigate to your Vercel production URL: `https://algoverse-green.vercel.app`.
+
 2. Test user login via Clerk.
 3. Open Dijkstra Visualizer, interact with the graph editor, run the simulation, save a custom graph, and take the quiz to verify production API connectivity.
